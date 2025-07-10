@@ -1,0 +1,8 @@
+*.jpeg
+*.jpg
+*.png
+*.db
+*.pkl
+__pycache__
+static/img/
+.venv/

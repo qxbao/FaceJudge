@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Image Judge</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="">
+  </head>
+  <body>
+    <h1>{{age}}</h1>
+    <img 
+      src={{ url_for('static', filename='img/'+img) }}
+    />
+    <form id="myform" method="post">
+      <input type="hidden" name="image" value="{{ img }}">
+      <input type="hidden" name="age" value="{{ age }}">
+      <input type="number" name="score" min="0" max="100" step="1" required>
+      <button type="submit">Send</button>
+    </form>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('myform');
+        form.addEventListener('submit', function(event) {
+          event.preventDefault(); // Prevent the default form submission
+          const formData = new FormData(form);
+          const jsonData = {
+            image: formData.get('image'),
+            age: formData.get('age'),
+            score: formData.get('score')
+          }
+          
+          fetch('/judge', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: jsonData ? JSON.stringify(jsonData) : null
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              location.reload()
+            }
+          })
+          .catch(error => console.error('Error:', error));
+        });
+      });
+
+    </script>
+  </body>
+</html>
