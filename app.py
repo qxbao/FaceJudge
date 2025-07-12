@@ -1,46 +1,47 @@
-from flask import Flask, render_template, request, jsonify, redirect
-import os
+from flask import Flask, request, jsonify
 from database import Database
-import base64
+from flask_cors import CORS, cross_origin
+import uuid
 
 app = Flask(__name__)
-imgDir = os.path.join(os.path.dirname(__file__), 'static', 'img')
-imgs = os.listdir(imgDir)
+cors = CORS(app)
 
-@app.route('/', methods=['GET', 'POST', 'PUT', 'DELETE',])
-def index():
-    age = imgs[0].split('_')[0]
-    return render_template('index.html', img=imgs[0], age=age)
 
-@app.route('/judge', methods=['POST'])
+@app.before_request
+def handle_options_preflight():
+    if request.method == "OPTIONS":
+        headers = {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Max-Age": "3600",
+        }
+        return jsonify(headers), 200
+
+
+@app.route("/judge", methods=["POST"])
+@cross_origin()
 def judge():
-    import uuid
-    data = request.get_json(force=True)
-    print("Received data:", data)
-    if not data or 'image' not in data or 'age' not in data:
+    print("Received request to /judge")
+    data = request.json
+    if not data or "images" not in data or "age" not in data:
         print("No image or age provided in request data")
-        return jsonify({'error': 'No image or age provided'}), 400    
-    image_name = data['image']
-    age = data['age']
-    score = data['score']
-    print(f"Received image: {image_name}, age: {age}, score: {score}")
-    if image_name not in imgs:
-        return jsonify({'error': 'Image not found'}), 401
+        return jsonify({"error": "No image or age provided"}), 400
+    images = data["images"]
+    age = data["age"]
+    score = data["score"]
+    print(f"Received image: {len(images)}, age: {age}, score: {score}")
 
     db = Database()
-    profile_id, profile_folder = db.add_profile(age, 1, score, str(uuid.uuid4()))
-    with open(os.path.join(os.path.dirname(__file__), 'static', 'img', image_name), 'rb') as f:
-        image = f.read()
-        img = base64.b64encode(image).decode('utf-8')
-        data_uri = f"data:image/jpg;base64,{img}"
-        db.add_profile_images(profile_id, profile_folder, [data_uri])
-        db.close()
-        imgs.pop(0)
-        f.close()
-        return {
-            'profile_id': profile_id,
-            'profile_folder': profile_folder
-        }
+    profile_id, profile_folder = db.add_profile(
+        age, len(images), score, str(uuid.uuid4())
+    )
+    db.add_profile_images(profile_id, profile_folder, images)
+    db.close()
+    return {"profile_id": profile_id, "profile_folder": profile_folder}
+
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    db = Database()
+    db.close()
+    app.run(port=5000)

@@ -27,37 +27,26 @@ class InputImageFolder:
         known_faces = []
         face_models = []
         for index, image in enumerate(self.images):
-            print(f"Processing image {index + 1}/{len(self.images)}")
             face_locations = face_recognition.face_locations(image)
             if len(face_locations) == 0:
-                print(f"No faces found in {index + 1}")
                 continue
             elif len(face_locations) > 1:
-                print(f"Multiple faces found in {index + 1}")
                 if index == 0:
-                    print("No root face to compare with, swap location")
                     self.images.append(image)
                     self.images = self.images[:index] + self.images[index + 1:]
                     return self.convert_to_faces(t+1)
                 else:
-                    print("Comparing faces")
                     for index, face_location in enumerate(face_locations):
-                        print(f"Comparing face at location {index + 1}")
                         face = face_recognition.face_encodings(
                             image, [face_location])[0]
                         comparison = face_recognition.compare_faces(
                             face_models, face)
                         if True in comparison:
-                            print(
-                                f"Face at location {index + 1} matches known faces")
                             face_models.append(face)
                             top, right, bottom, left = face_location
                             known_faces.append(image[top:bottom, left:right])
                             break
-                        print(
-                            f"Face at location {index + 1} does not match known faces")
             else:
-                print(f"Single face found in {index + 1}")
                 top, right, bottom, left = face_locations[0]
                 face = face_recognition.face_encodings(
                     image, [face_locations[0]])[0]

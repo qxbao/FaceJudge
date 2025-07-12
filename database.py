@@ -9,9 +9,9 @@ IMAGES_PATH = os.path.join(DATA_PATH, 'images')
 
 class Database:
     def __init__(self) -> None:
+        self.__init_db()
         self.db_path = os.path.join(DATA_PATH, DB_NAME)
         self.conn = sqlite3.connect(self.db_path)
-        self.__init_db()
         
     def get_profiles(self) -> list[any]:
         cursor = self.conn.cursor()

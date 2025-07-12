@@ -5,4 +5,8 @@
 *.pkl
 __pycache__
 static/img/
+data/
 .venv/
+*.rar
+*.zip
+*.tar.gz
