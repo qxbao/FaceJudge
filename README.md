@@ -31,7 +31,6 @@ FaceJudge/
 ├── image_processing.py   # Image processing and face detection
 ├── train.py              # Model training script
 ├── predict.py            # Prediction script for single images
-├── tuning.py             # Model tuning and testing
 ├── cleaner.py            # Data cleaning utilities
 ├── bumble.js             # Browser extension for Bumble
 ├── templates/
